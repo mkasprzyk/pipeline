@@ -1,7 +1,4 @@
 {
-  "name": "/",
-  "contents": [
-    {
       "name": "Stages",
       "contents": [
         {
@@ -36,7 +33,13 @@
               "name": "Job1",
               "contents": [
                 {
-                  "name": "SubJob1"
+                  "name": "SubJob1",
+                  "contents": [
+                        {
+                            "name": "SubSubJob1",
+                            "contents": []
+                        }
+                  ]
                 },
                 {
                   "name": "SubJob2"
@@ -52,6 +55,4 @@
           ]
         }
       ]
-    }
-  ]
 }
