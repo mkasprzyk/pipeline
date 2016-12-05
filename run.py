@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 from flask_restful import Resource, Api
 from utils import make_celery
+import json
 
 app = Flask(__name__)
 api = Api(app)
@@ -22,7 +23,8 @@ def update_status():
 
 class Pipeline(Resource):
     def get(self):
-        return {}
+        with open('static/data/fixture.json') as data:
+            return json.load(data)
 
 api.add_resource(Pipeline, '/pipeline')
 
