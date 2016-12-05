@@ -5,6 +5,7 @@
 
 <body>
 <div id="pipeline"></div>
+<div id="event"></div>
 
 <script type="text/javascript" src="static/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="static/js/d3.min.js"></script>
@@ -13,12 +14,21 @@
 
 <script>
     $(function () {
-        $.getJSON('static/data/fixture.json', function(data) {
+        var eventContainer = document.getElementById("event");
+        var eventSource = new EventSource("/subscribe");
+
+         eventSource.onmessage = function(e) {
+             console.log(e.data);
+             eventContainer.innerHTML = e.data;
+         };
+
+        $.getJSON('/pipeline', function(data) {
             buildPipeline("#pipeline", data);
         })
         .fail(function() {
             console.log("Corrupted pipeline JSON file");
         })
+
     });
 </script>
 
