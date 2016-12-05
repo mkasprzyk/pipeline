@@ -1,0 +1,26 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="static/css/style.css">
+</head>
+
+<body>
+<div id="pipeline"></div>
+
+<script type="text/javascript" src="static/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="static/js/d3.min.js"></script>
+<script type="text/javascript" src="static/js/d3.layout.min.js"></script>
+<script type="text/javascript" src="static/js/pipeline.js"></script>
+
+<script>
+    $(function () {
+        $.getJSON('static/data/fixture.json', function(data) {
+            buildPipeline("#pipeline", data);
+        })
+        .fail(function() {
+            console.log("Corrupted pipeline JSON file");
+        })
+    });
+</script>
+
+</body>
+</html>
