@@ -1,0 +1,57 @@
+{
+  "name": "/",
+  "contents": [
+    {
+      "name": "Stages",
+      "contents": [
+        {
+          "name": "Build",
+          "contents": [
+            {
+              "name": "Job1"
+            },
+            {
+              "name": "Job2"
+            },
+            {
+              "name": "Job3"
+            }
+          ]
+        },
+        {
+          "name": "Test",
+          "contents": [
+            {
+              "name": "Job1"
+            },
+            {
+              "name": "Job2"
+            }
+          ]
+        },
+        {
+          "name": "Deploy",
+          "contents": [
+            {
+              "name": "Job1",
+              "contents": [
+                {
+                  "name": "SubJob1"
+                },
+                {
+                  "name": "SubJob2"
+                },
+                {
+                  "name": "SubJob3"
+                },
+                {
+                  "name": "SubJob4"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

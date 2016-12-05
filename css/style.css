@@ -1,0 +1,21 @@
+g.node {
+    font-family: Verdana, Helvetica;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+@keyframes blinker {  
+    50% { opacity: 0; }
+}
+
+circle.node-dot {
+    fill: green;
+    /* animation: blinker 2s linear infinite; */
+    stroke: green;
+    stroke-width: 1px;
+}
+
+path.link {
+    fill: none;
+    stroke: gray;
+}
