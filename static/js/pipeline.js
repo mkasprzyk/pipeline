@@ -94,6 +94,7 @@ function buildPipeline(containerName, pipelineData, customOptions)
 
     nodeGroup.append("svg:circle")
         .attr("class", "node-dot")
+        .attr("id", d.name+'-circle')
         .attr("r", options.nodeRadius);
 
     nodeGroup.append("svg:text")
@@ -106,6 +107,7 @@ function buildPipeline(containerName, pipelineData, customOptions)
             var gap = 2 * options.nodeRadius;
             return d.children ? -gap : gap;
         })
+        .attr("id", d.name+'-text')
         .attr("dy", 3)
         .text(function(d)
         {
