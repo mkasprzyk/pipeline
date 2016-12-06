@@ -76,24 +76,24 @@ class Pipeline(object):
 @coroutine
 def d3js_generator():
     pipeline = []
-    wc = {}
+    item = {}
     while True:
         content = (yield)
         event = content.get('event')
         body = content.get('body')
 
         if event == Pipeline.OPEN_THREAD:
-            wc["contents"] = []
-            wc["name"] = body
+            item["contents"] = []
+            item["name"] = body
 
         if event == Pipeline.PARSE_JOB:
-            wc["contents"].append({
+            item["contents"].append({
                 'name': body['name']
             })
 
         if event == Pipeline.CLOSE_THREAD:
-            pipeline.append(wc)
-            wc = {}
+            pipeline.append(item)
+            item = {}
 
         if event == Pipeline.CLOSE_BODY:
             print(json.dumps({'contents': pipeline, 'name': 'Root'}))
