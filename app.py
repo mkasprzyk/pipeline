@@ -1,14 +1,17 @@
 from flask import Flask, Response, jsonify, render_template, request
 from flask_restful import Resource, Api
-from pipeline_parser import Pipeline, d3js_generator
 from jenkinsapi.jenkins import Jenkins
 from gevent.wsgi import WSGIServer
 from gevent.queue import Queue
-from sse import ServerSentEvent
+from gevent import monkey
+monkey.patch_all()
 import gevent
 import json
 import time
 import os
+
+from pipeline_parser import Pipeline, d3js_generator
+from sse import ServerSentEvent
 
 
 app = Flask(__name__)
