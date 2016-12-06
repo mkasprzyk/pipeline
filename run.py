@@ -1,33 +1,57 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 from flask_restful import Resource, Api
-from utils import make_celery
+from gevent.wsgi import WSGIServer
+from gevent.queue import Queue
+from sse import ServerSentEvent
+import gevent
 import json
+import time
 
 app = Flask(__name__)
 api = Api(app)
-app.config.update(
-    CELERY_BROKER_URL='redis://localhost:6379',
-    CELERY_RESULT_BACKEND='redis://localhost:6379'
-)
-celery = make_celery(app)
-
+subscriptions = []
 
 @app.route('/')
 def index():
-    result = update_status.delay()
     return render_template('index.html')
 
-@celery.task
-def update_status():
-    return True
+@app.route("/subscribe")
+def subscribe():
+    def gen():
+        q = Queue()
+        subscriptions.append(q)
+        try:
+            while True:
+                result = q.get()
+                ev = ServerSentEvent(str(result))
+                yield ev.encode()
+        except GeneratorExit:
+            subscriptions.remove(q)
+    return Response(gen(), mimetype="text/event-stream")
+
+@app.route("/tasks")
+def tasks():
+    return Response("Tasks: {}".format(len(subscriptions)))
+
+@app.route("/update")
+def publish():
+    def notify():
+        msg = str(time.time())
+        for sub in subscriptions[:]:
+            sub.put(msg)
+    gevent.spawn(notify)
+    return "OK"
 
 class Pipeline(Resource):
     def get(self):
         with open('static/data/fixture.json') as data:
             return json.load(data)
 
+
 api.add_resource(Pipeline, '/pipeline')
 
 if __name__ == '__main__':
-    app.run()
+    app.debug = True
+    server = WSGIServer(("", 5000), app)
+    server.serve_forever()
 
