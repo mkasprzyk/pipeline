@@ -17,7 +17,7 @@ function buildPipeline(containerName, pipelineData, customOptions)
 {
     // build the options object
     var options = $.extend({
-        nodeRadius: 8, fontSize: 12
+        nodeRadius: 6, fontSize: 12
     }, customOptions);
 
     
@@ -99,7 +99,7 @@ function buildPipeline(containerName, pipelineData, customOptions)
         })
         .attr("r", options.nodeRadius)
         .style("fill", function(d) {
-            return d.color || "yellow" ;
+            return d.color || "white" ;
         });
 
     nodeGroup.append("svg:text")

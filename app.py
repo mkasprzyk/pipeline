@@ -49,11 +49,22 @@ def publish():
         result = None
         if jenkins:
             request = jenkins.get_jobs()
-            result = json.dumps({name: job.is_running() for name, job in request})
+            data = {}
+            for name, job in request:
+                try:
+                    last_build = job.get_last_build()
+                    is_good = last_build.is_good()
+                except:
+                    is_good = False
+                data[name] = {
+                    'is_running': job.is_running(),
+                    'is_good': is_good}
+            result = json.dumps(data)
+
         for sub in subscriptions[:]:
             sub.put(result)
     gevent.spawn(notify)
-    return "OK"
+    return jsonify({'status': 200})
 
 class Data(Resource):
     def get(self):
