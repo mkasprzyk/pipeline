@@ -13,53 +13,60 @@ class PipelineParser(object):
     OPEN_BODY = 'OPEN_BODY'
     CLOSE_BODY = 'CLOSE_BODY'
     EMPTY_STEP = 'EMPTY_STEP'
+    PARSE_STEPS = 'PARSE_STEPS'
+
+    ROS = 'RunOnStart'
+    SNT = 'SingleNameThreads'
+    MNT = 'MultipleNamesThreads'
+
+    def send(self, stream, event, body, pk):
+        stream.send({'event': event, 'body': body, 'pk': pk})
+
+    @coroutine
+    def parse_steps(self, stream):
+        while True:
+            tasks = (yield)
+            print(tasks)
+            
 
     @coroutine
     def pipeline_parser(self, stream):
 
-        ROS = 'RunOnStart'
-        SNT = 'SingleNameThreads'
-        MNT = 'MultipleNamesThreads'
-        required_keys = [ROS, SNT, MNT]
+        required_keys = [self.ROS, self.SNT, self.MNT]
 
-        def send(event, body, pk):
-            stream.send({event: body, 'pk': pk})
-
-        def multi(steps, token, pk): 
+        def multi(stream, steps, body, pk): 
             if len(steps[token]) > 1:
-                send(token, self.PARALLEL, pk)
-                send(token, self.OPEN_BODY, pk)
+                self.send(stream, self.PARALLEL, body, pk)
+                self.send(stream, self.OPEN_BODY, body, pk)
             for thread in steps[token]:
                 if steps[token][thread]:
-                    send(token, steps[token][thread], pk)
+                    self.send(stream, self.PARSE_STEPS, steps[token][thread], pk)
             if len(steps[token]) > 1:
-                send(token, self.CLOSE_BODY, pk)
+                self.send(stream, self.CLOSE_BODY, body, pk)
         
         while True:
-            while True:
-                try:
-                    steps = (yield)
-                except GeneratorExit:
-                    raise
-                if not [steps[token] for token in required_keys if steps[token]]:
-                    send(None, self.EMPTY_STEP)
-                for pk, (key, value) in enumerate(steps.items(), 1):
-                    if key == ROS:
-                        send(ROS, value, pk)
-                    if key == SNT:
-                        multi(steps, SNT, pk)
-                    if key == MNT:
-                        multi(steps, MNT, pk)
+            try:
+                steps = (yield)
+            except GeneratorExit:
+                raise
+            if not [steps[token] for token in required_keys if steps[token]]:
+                self.send(stream, self.EMPTY_STEP, None, None)
+            for pk, (key, value) in enumerate(steps.items(), 1):
+                if key == self.ROS:
+                    self.send(stream, key, value, pk)
+                if key == self.SNT or key == self.MNT:
+                    multi(stream, steps, key, pk)
 
 
 @coroutine
 def printer():
   while True:
     stuff = (yield)
-    print stuff
+    #print stuff
 
+pp = PipelineParser()
 
-parser = PipelineParser().pipeline_parser(printer())
+parser = pp.pipeline_parser(pp.parse_steps(printer()))
 
 if __name__ == '__main__':
 
