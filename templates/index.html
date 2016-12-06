@@ -24,9 +24,11 @@
          eventSource.onmessage = function(e) {
             event_data = JSON.parse(e.data);
             $.each(event_data, function(job, status) {
+                handler = d3.select('#'+job.toLowerCase()+'-circle');
                 if (status) {
-                    d3.select('#'+job.toLowerCase()+'-circle')
-                    .style('animation', 'blinker 2s linear infinite');
+                    handler.style('animation', 'blinker 2s linear infinite');
+                } else {
+                    handler.style('animation', 'false');
                 }
             })
          };
