@@ -1,3 +1,4 @@
+from Queue import Queue
 import json
 
 def coroutine(fn):
@@ -9,7 +10,6 @@ def coroutine(fn):
 
 
 class Pipeline(object):
-
 
     START = 'START'
     STOP = 'STOP'
@@ -81,7 +81,7 @@ class Pipeline(object):
 
 
 @coroutine
-def d3js_generator():
+def d3js_generator(stream):
     CONTENTS = 'contents'
 
     pipeline = []
@@ -110,13 +110,14 @@ def d3js_generator():
             item = {}
 
         if event == Pipeline.STOP:
-            print(json.dumps({'contents': pipeline, 'name': 'Root'}))
+            stream.put({'contents': pipeline, 'name': 'Root'})
 
 
 if __name__ == '__main__':
+    stream = Queue()
 
-    pipeline = Pipeline(d3js_generator())
-    parser = pipeline.start()
+    pipeline = Pipeline(d3js_generator(stream)).start()
+    data = json.load(open('fixtures/data.json'))
+    pipeline.send(data)
 
-    data = json.load(open('fixture/data.json'))
-    parser.send(data)
+    print(stream.get())

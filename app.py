@@ -1,5 +1,6 @@
 from flask import Flask, Response, jsonify, render_template, request
 from flask_restful import Resource, Api
+from pipeline_parser import Pipeline, d3js_generator
 from jenkinsapi.jenkins import Jenkins
 from gevent.wsgi import WSGIServer
 from gevent.queue import Queue
@@ -51,13 +52,16 @@ def publish():
     gevent.spawn(notify)
     return "OK"
 
-class Pipeline(Resource):
+class Data(Resource):
     def get(self):
-        with open('static/data/fixture2.json') as data:
-            return json.load(data)
+        data = json.load(open('fixtures/data.json'))
 
+        stream = Queue()
+        pipeline = Pipeline(d3js_generator(stream)).start()
+        pipeline.send(data)
+        return jsonify(stream.get())
 
-api.add_resource(Pipeline, '/pipeline')
+api.add_resource(Data, '/pipeline')
 
 if __name__ == '__main__':
     app.debug = True
