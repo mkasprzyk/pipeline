@@ -9,7 +9,7 @@ g.node {
 }
 
 circle.node-dot {
-    fill: green;
+    /* fill: green;*/
     /* animation: blinker 2s linear infinite; */
     stroke: green;
     stroke-width: 1px;

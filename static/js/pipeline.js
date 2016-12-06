@@ -94,8 +94,13 @@ function buildPipeline(containerName, pipelineData, customOptions)
 
     nodeGroup.append("svg:circle")
         .attr("class", "node-dot")
-        .attr("id", d.name+'-circle')
-        .attr("r", options.nodeRadius);
+        .attr("id", function(d) {
+            return d.name.toLowerCase()+'-circle';
+        })
+        .attr("r", options.nodeRadius)
+        .style("fill", function(d) {
+            return d.color || "yellow" ;
+        });
 
     nodeGroup.append("svg:text")
         .attr("text-anchor", function(d)
@@ -107,7 +112,9 @@ function buildPipeline(containerName, pipelineData, customOptions)
             var gap = 2 * options.nodeRadius;
             return d.children ? -gap : gap;
         })
-        .attr("id", d.name+'-text')
+        .attr("id", function(d) {
+            return d.name.toLowerCase()+'-text';
+        })
         .attr("dy", 3)
         .text(function(d)
         {

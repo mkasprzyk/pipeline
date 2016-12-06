@@ -5,7 +5,6 @@
 
 <body>
 <div id="pipeline"></div>
-<div id="event"></div>
 
 <script type="text/javascript" src="static/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="static/js/d3.min.js"></script>
@@ -18,8 +17,10 @@
         var eventSource = new EventSource("/events");
 
          eventSource.onmessage = function(e) {
+            d3.select("#deploy-circle")
+            .style("fill", "red")
+            .style("animation", "blinker 2s linear infinite");
              console.log(e.data);
-             eventContainer.innerHTML = e.data;
          };
 
         $.getJSON('/pipeline', function(data) {
@@ -28,6 +29,7 @@
         .fail(function() {
             console.log("Corrupted pipeline JSON file");
         })
+
 
     });
 </script>
