@@ -1,3 +1,6 @@
+from itertools import chain
+import json
+
 def coroutine(fn):
     def wrapper(*args, **kwargs):
         result = fn(*args, **kwargs)
@@ -6,43 +9,54 @@ def coroutine(fn):
     return wrapper
 
 
-
-class PipelineParser(object):
+class Pipeline(object):
 
     PARALLEL = 'PARALLEL'
     OPEN_BODY = 'OPEN_BODY'
     CLOSE_BODY = 'CLOSE_BODY'
+    OPEN_CALL = 'OPEN_CALL'
+    CLOSE_CALL = 'CLOSE_CALL'
     EMPTY_STEP = 'EMPTY_STEP'
     PARSE_STEPS = 'PARSE_STEPS'
-
+    PARSE_JOB = 'PARSE_JOB'
+    PARSE_INPUT = 'PARSE_INPUT'
+    OPEN_THREAD = 'OPEN_THREAD'
+    CLOSE_THREAD = 'CLOSE_THREAD'
+    
     ROS = 'RunOnStart'
     SNT = 'SingleNameThreads'
     MNT = 'MultipleNamesThreads'
 
-    def send(self, stream, event, body, pk):
+    def send(self, stream, event, body, pk, **kwargs):
         stream.send({'event': event, 'body': body, 'pk': pk})
 
     @coroutine
-    def parse_steps(self, stream):
-        while True:
-            tasks = (yield)
-            print(tasks)
-            
-
-    @coroutine
-    def pipeline_parser(self, stream):
+    def parser(self, stream):
 
         required_keys = [self.ROS, self.SNT, self.MNT]
 
-        def multi(stream, steps, body, pk): 
+        def parse_steps(stream, tasks):
+            self.send(stream, self.OPEN_CALL, None, None)
+            for task in tasks:
+                if task['type'] == 'job':
+                    self.send(stream, self.PARSE_JOB, task, None)
+                if task['type'] == 'input':
+                    self.send(stream, self.PARSE_INPUT, task, None)
+            self.send(stream, self.CLOSE_CALL, None, None)
+
+        def multi(stream, token, body, pk): 
             if len(steps[token]) > 1:
-                self.send(stream, self.PARALLEL, body, pk)
-                self.send(stream, self.OPEN_BODY, body, pk)
+                self.send(stream, self.PARALLEL, token, pk)
+                self.send(stream, self.OPEN_BODY, token, pk)
             for thread in steps[token]:
                 if steps[token][thread]:
-                    self.send(stream, self.PARSE_STEPS, steps[token][thread], pk)
+                    body = steps[token][thread]
+                    self.send(stream, self.OPEN_THREAD, thread, pk)
+                    self.send(stream, self.PARSE_STEPS, body, pk)
+                    parse_steps(stream, body)
+                    self.send(stream, self.CLOSE_THREAD, thread, pk)
             if len(steps[token]) > 1:
-                self.send(stream, self.CLOSE_BODY, body, pk)
+                self.send(stream, self.CLOSE_BODY, token, pk)
         
         while True:
             try:
@@ -51,24 +65,44 @@ class PipelineParser(object):
                 raise
             if not [steps[token] for token in required_keys if steps[token]]:
                 self.send(stream, self.EMPTY_STEP, None, None)
-            for pk, (key, value) in enumerate(steps.items(), 1):
-                if key == self.ROS:
-                    self.send(stream, key, value, pk)
-                if key == self.SNT or key == self.MNT:
-                    multi(stream, steps, key, pk)
+            for pk, (token, body) in enumerate(steps.items(), 1):
+                if token == self.ROS:
+                    self.send(stream, token, body, pk)
+                if token == self.SNT or token == self.MNT:
+                    multi(stream, token, body, pk)
 
 
 @coroutine
-def printer():
-  while True:
-    stuff = (yield)
-    #print stuff
+def d3js_generator():
+    pipeline = []
+    wc = {}
+    while True:
+        content = (yield)
+        event = content.get('event')
+        body = content.get('body')
 
-pp = PipelineParser()
+        if event == Pipeline.OPEN_THREAD:
+            wc["contents"] = []
+            wc["name"] = body
 
-parser = pp.pipeline_parser(pp.parse_steps(printer()))
+        if event == Pipeline.PARSE_JOB:
+            wc["contents"].append({
+                'name': body['name']
+            })
+
+        if event == Pipeline.CLOSE_THREAD:
+            pipeline.append(wc)
+
+        if event == Pipeline.CLOSE_BODY:
+            print(json.dumps({'contents': pipeline}))
+
+
+
 
 if __name__ == '__main__':
+
+    pipeline = Pipeline()
+    parser = pipeline.parser(d3js_generator())
 
     data = {
         'RunOnStart': [
