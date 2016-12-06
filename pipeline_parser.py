@@ -35,7 +35,6 @@ class PipelineParser(object):
             if len(steps[token]) > 1:
                 send(token, self.CLOSE_BODY, pk)
         
-        event = None
         while True:
             while True:
                 try:
