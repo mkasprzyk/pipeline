@@ -11,6 +11,9 @@ def coroutine(fn):
 
 class Pipeline(object):
 
+
+    START = 'START'
+    STOP = 'STOP'
     PARALLEL = 'PARALLEL'
     OPEN_BODY = 'OPEN_BODY'
     CLOSE_BODY = 'CLOSE_BODY'
@@ -67,18 +70,21 @@ class Pipeline(object):
                 steps = (yield)
             except GeneratorExit:
                 raise
+            self.send(self.START, None, None)
             if not [steps[token] for token in required_keys if steps[token]]:
                 self.send(self.EMPTY_STEP, None, None)
             for pk, (token, body) in enumerate(steps.items(), 1):
                 if token == self.ROS:
-                    #TODO
-                    pass
+                    parse_steps(body)
                 if token == self.SNT or token == self.MNT:
                     multi(token, body, pk)
+            self.send(self.STOP, None, None)
 
 
 @coroutine
 def d3js_generator():
+    CONTENTS = 'contents'
+
     pipeline = []
     item = {}
     while True:
@@ -87,19 +93,24 @@ def d3js_generator():
         body = content.get('body')
 
         if event == Pipeline.OPEN_THREAD:
-            item["contents"] = []
+            item[CONTENTS] = []
             item["name"] = body
 
         if event == Pipeline.PARSE_JOB:
-            item["contents"].append({
-                'name': body['name']
-            })
+            if not item:
+                pipeline.append({
+                    'name': body['name']    
+                })
+            else:
+                item[CONTENTS].append({
+                    'name': body['name']
+                })
 
         if event == Pipeline.CLOSE_THREAD:
             pipeline.append(item)
             item = {}
 
-        if event == Pipeline.CLOSE_BODY:
+        if event == Pipeline.STOP:
             print(json.dumps({'contents': pipeline, 'name': 'Root'}))
 
 
