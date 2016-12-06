@@ -65,9 +65,11 @@ parser = PipelineParser().pipeline_parser(printer())
 if __name__ == '__main__':
 
     data = {
-        'RunOnStart': {
-            'type': 'job', 
-            'name': 'Test'},
+        'RunOnStart': [
+            {
+                'type': 'job', 
+                'name': 'Test'
+            }],
         
         'SingleNameThreads': {},
 
