@@ -17,10 +17,13 @@
         var eventSource = new EventSource("/events");
 
          eventSource.onmessage = function(e) {
-            d3.select("#deploy-circle")
-            .style("fill", "red")
-            .style("animation", "blinker 2s linear infinite");
-             console.log(e.data);
+            event_data = JSON.parse(e.data);
+            $.each(event_data, function(job, status) {
+                if (status) {
+                    d3.select('#'+job.toLowerCase()+'-circle')
+                    .style('animation', 'blinker 2s linear infinite');
+                }
+            })
          };
 
         $.getJSON('/pipeline', function(data) {

@@ -46,7 +46,7 @@ def publish():
         result = None
         if jenkins:
             request = jenkins.get_jobs()
-            result = {name: job.is_running() for name, job in request}
+            result = json.dumps({name: job.is_running() for name, job in request})
         for sub in subscriptions[:]:
             sub.put(result)
     gevent.spawn(notify)
