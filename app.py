@@ -53,7 +53,7 @@ def publish():
 
 class Pipeline(Resource):
     def get(self):
-        with open('static/data/fixture.json') as data:
+        with open('static/data/fixture2.json') as data:
             return json.load(data)
 
 

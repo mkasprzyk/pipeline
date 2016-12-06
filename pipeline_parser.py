@@ -67,7 +67,8 @@ class Pipeline(object):
                 self.send(stream, self.EMPTY_STEP, None, None)
             for pk, (token, body) in enumerate(steps.items(), 1):
                 if token == self.ROS:
-                    self.send(stream, token, body, pk)
+                    #TODO
+                    pass
                 if token == self.SNT or token == self.MNT:
                     multi(stream, token, body, pk)
 
@@ -92,9 +93,10 @@ def d3js_generator():
 
         if event == Pipeline.CLOSE_THREAD:
             pipeline.append(wc)
+            wc = {}
 
         if event == Pipeline.CLOSE_BODY:
-            print(json.dumps({'contents': pipeline}))
+            print(json.dumps({'contents': pipeline, 'name': 'Root'}))
 
 
 
@@ -132,6 +134,10 @@ if __name__ == '__main__':
                 {
                     'type': 'job',
                     'name': 'JOB2_1'
+                },
+                {
+                    'type': 'job',
+                    'name': 'JOB2_2'
                 },
             ],
         }
