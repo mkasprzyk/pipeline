@@ -44,13 +44,13 @@ def events():
     return Response(gen(), mimetype="text/event-stream")
 
 @app.route("/update")
-def publish():
+def update():
     def notify():
         result = None
         if jenkins:
-            request = jenkins.get_jobs()
+            jobs = jenkins.get_jobs()
             data = {}
-            for name, job in request:
+            for name, job in jobs:
                 try:
                     last_build = job.get_last_build()
                     is_good = last_build.is_good()
@@ -60,11 +60,12 @@ def publish():
                     'is_running': job.is_running(),
                     'is_good': is_good}
             result = json.dumps(data)
-
         for sub in subscriptions[:]:
             sub.put(result)
+
     gevent.spawn(notify)
     return jsonify({'status': 200})
+
 
 class Data(Resource):
     def get(self):
@@ -76,6 +77,7 @@ class Data(Resource):
         return jsonify(stream.get())
 
 api.add_resource(Data, '/pipeline')
+
 
 if __name__ == '__main__':
     app.debug = True
