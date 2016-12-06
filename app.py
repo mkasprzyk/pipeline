@@ -20,7 +20,6 @@ try:
         username=os.environ.get('JENKINS_USERNAME'),
         password=os.environ.get('JENKINS_PASSWORD'))
 except Exception as e:
-    print(e)
     jenkins = None
 
 @app.route('/')
@@ -46,7 +45,8 @@ def publish():
     def notify():
         result = None
         if jenkins:
-            result = jenkins.get_jobs()
+            request = jenkins.get_jobs()
+            result = {name: job.is_running() for name, job in request}
         for sub in subscriptions[:]:
             sub.put(result)
     gevent.spawn(notify)
