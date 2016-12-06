@@ -108,7 +108,11 @@ if __name__ == '__main__':
         'RunOnStart': [
             {
                 'type': 'job', 
-                'name': 'Test'
+                'name': 'Test1'
+            },
+            {
+                'type': 'job', 
+                'name': 'Test2'
             }],
         
         'SingleNameThreads': {},
@@ -129,10 +133,6 @@ if __name__ == '__main__':
                     'type': 'job',
                     'name': 'JOB2_1'
                 },
-                {
-                    'type': 'job',
-                    'name': 'JOB2_2'
-                }
             ],
         }
     }
