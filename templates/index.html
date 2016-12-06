@@ -15,7 +15,7 @@
 <script>
     $(function () {
         var eventContainer = document.getElementById("event");
-        var eventSource = new EventSource("/subscribe");
+        var eventSource = new EventSource("/events");
 
          eventSource.onmessage = function(e) {
              console.log(e.data);
