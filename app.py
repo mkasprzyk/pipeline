@@ -16,7 +16,7 @@ subscriptions = []
 
 try:
     jenkins = Jenkins(os.environ.get('JENKINS_URL'),
-        username=os.environ.get('JENKINS_USER'),
+        username=os.environ.get('JENKINS_USERNAME'),
         password=os.environ.get('JENKINS_PASSWORD'))
 except Exception as e:
     print(e)
