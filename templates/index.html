@@ -15,6 +15,11 @@
     $(function () {
         var eventContainer = document.getElementById("event");
         var eventSource = new EventSource("/events");
+        var interval = 10;
+
+        function update() {
+            $.get('/update', function(data) {})
+        }
 
          eventSource.onmessage = function(e) {
             event_data = JSON.parse(e.data);
@@ -28,10 +33,13 @@
 
         $.getJSON('/pipeline', function(data) {
             buildPipeline("#pipeline", data);
+            update();
+            setInterval(update, 3600*interval);
         })
         .fail(function() {
             console.log("Corrupted pipeline JSON file");
         })
+
 
 
     });
