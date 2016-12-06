@@ -1,4 +1,3 @@
-from itertools import chain
 import json
 
 def coroutine(fn):
@@ -114,48 +113,10 @@ def d3js_generator():
             print(json.dumps({'contents': pipeline, 'name': 'Root'}))
 
 
-
-
 if __name__ == '__main__':
 
     pipeline = Pipeline(d3js_generator())
     parser = pipeline.start()
 
-    data = {
-        'RunOnStart': [
-            {
-                'type': 'job', 
-                'name': 'Test1'
-            },
-            {
-                'type': 'job', 
-                'name': 'Test2'
-            }],
-        
-        'SingleNameThreads': {},
-
-        'MultipleNamesThreads': {
-            'TEST1': [
-                {
-                    'type': 'job',
-                    'name': 'JOB1_1'
-                },
-                {
-                    'type': 'job',
-                    'name': 'JOB1_2'
-                }
-            ],
-            'TEST2': [
-                {
-                    'type': 'job',
-                    'name': 'JOB2_1'
-                },
-                {
-                    'type': 'job',
-                    'name': 'JOB2_2'
-                },
-            ],
-        }
-    }
-
+    data = json.load(open('fixture/data.json'))
     parser.send(data)
