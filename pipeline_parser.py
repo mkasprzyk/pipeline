@@ -26,37 +26,41 @@ class Pipeline(object):
     ROS = 'RunOnStart'
     SNT = 'SingleNameThreads'
     MNT = 'MultipleNamesThreads'
+    
 
-    def send(self, stream, event, body, pk, **kwargs):
-        stream.send({'event': event, 'body': body, 'pk': pk})
+    def __init__(self, stream):
+        self.stream = stream
+
+    def send(self, event, body, pk, **kwargs):
+        self.stream.send({'event': event, 'body': body, 'pk': pk})
 
     @coroutine
-    def parser(self, stream):
+    def start(self):
 
         required_keys = [self.ROS, self.SNT, self.MNT]
 
-        def parse_steps(stream, tasks):
-            self.send(stream, self.OPEN_CALL, None, None)
+        def parse_steps(tasks):
+            self.send(self.OPEN_CALL, None, None)
             for task in tasks:
                 if task['type'] == 'job':
-                    self.send(stream, self.PARSE_JOB, task, None)
+                    self.send(self.PARSE_JOB, task, None)
                 if task['type'] == 'input':
-                    self.send(stream, self.PARSE_INPUT, task, None)
-            self.send(stream, self.CLOSE_CALL, None, None)
+                    self.send(self.PARSE_INPUT, task, None)
+            self.send(self.CLOSE_CALL, None, None)
 
-        def multi(stream, token, body, pk): 
+        def multi(token, body, pk): 
             if len(steps[token]) > 1:
-                self.send(stream, self.PARALLEL, token, pk)
-                self.send(stream, self.OPEN_BODY, token, pk)
+                self.send(self.PARALLEL, token, pk)
+                self.send(self.OPEN_BODY, token, pk)
             for thread in steps[token]:
                 if steps[token][thread]:
                     body = steps[token][thread]
-                    self.send(stream, self.OPEN_THREAD, thread, pk)
-                    self.send(stream, self.PARSE_STEPS, body, pk)
-                    parse_steps(stream, body)
-                    self.send(stream, self.CLOSE_THREAD, thread, pk)
+                    self.send(self.OPEN_THREAD, thread, pk)
+                    self.send(self.PARSE_STEPS, body, pk)
+                    parse_steps(body)
+                    self.send(self.CLOSE_THREAD, thread, pk)
             if len(steps[token]) > 1:
-                self.send(stream, self.CLOSE_BODY, token, pk)
+                self.send(self.CLOSE_BODY, token, pk)
         
         while True:
             try:
@@ -64,13 +68,13 @@ class Pipeline(object):
             except GeneratorExit:
                 raise
             if not [steps[token] for token in required_keys if steps[token]]:
-                self.send(stream, self.EMPTY_STEP, None, None)
+                self.send(self.EMPTY_STEP, None, None)
             for pk, (token, body) in enumerate(steps.items(), 1):
                 if token == self.ROS:
                     #TODO
                     pass
                 if token == self.SNT or token == self.MNT:
-                    multi(stream, token, body, pk)
+                    multi(token, body, pk)
 
 
 @coroutine
@@ -103,8 +107,8 @@ def d3js_generator():
 
 if __name__ == '__main__':
 
-    pipeline = Pipeline()
-    parser = pipeline.parser(d3js_generator())
+    pipeline = Pipeline(d3js_generator())
+    parser = pipeline.start()
 
     data = {
         'RunOnStart': [
