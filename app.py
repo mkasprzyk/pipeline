@@ -1,17 +1,26 @@
 from flask import Flask, Response, jsonify, render_template, request
 from flask_restful import Resource, Api
+from jenkinsapi.jenkins import Jenkins
 from gevent.wsgi import WSGIServer
 from gevent.queue import Queue
 from sse import ServerSentEvent
-import grequests
 import gevent
 import json
 import time
+import os
+
 
 app = Flask(__name__)
 api = Api(app)
 subscriptions = []
 
+try:
+    jenkins = Jenkins(os.environ.get('JENKINS_URL'),
+        username=os.environ.get('JENKINS_USER'),
+        password=os.environ.get('JENKINS_PASSWORD'))
+except Exception as e:
+    print(e)
+    jenkins = None
 
 @app.route('/')
 def index():
@@ -34,11 +43,11 @@ def events():
 @app.route("/update")
 def publish():
     def notify():
-        URLS = ['http://google.pl']
-        requests = (grequests.get(u) for u in URLS)
-        responses = grequests.map(requests)
+        result = None
+        if jenkins:
+            result = jenkins.get_jobs()
         for sub in subscriptions[:]:
-            sub.put([r.status_code for r in responses])
+            sub.put(result)
     gevent.spawn(notify)
     return "OK"
 
