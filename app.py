@@ -23,6 +23,7 @@ try:
         username=os.environ.get('JENKINS_USERNAME'),
         password=os.environ.get('JENKINS_PASSWORD'))
 except Exception as e:
+    app.logger.error('Jenkins is unreachable')
     jenkins = None
 
 @app.route('/')
@@ -31,6 +32,7 @@ def index():
 
 @app.route("/events")
 def events():
+    app.logger.info('New subscriber: {}'.format(request.remote_addr))
     def gen():
         queue = Queue()
         subscriptions.append(queue)
