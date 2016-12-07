@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 def coroutine(fn):
     def wrapper(*args, **kwargs):
@@ -64,18 +65,19 @@ class Pipeline(object):
         
         while True:
             try:
-                steps = (yield)
+                sections = (yield)
             except GeneratorExit:
                 raise
             self.send(self.START, None, None)
-            if not [steps[token] for token in required_keys if steps[token]]:
-                self.send(self.EMPTY_STEP, None, None)
-            for pk, (token, body) in enumerate(steps.items(), 1):
-                if token == self.ROS:
-                    parse_steps(body)
-                if token == self.SNT or token == self.MNT:
-                    multi(token, body, pk)
-            self.send(self.STOP, None, None)
+            for steps in sections:
+                if not [steps[token] for token in required_keys if steps[token]]:
+                    self.send(self.EMPTY_STEP, None, None)
+                for pk, (token, body) in enumerate(steps.items(), 1):
+                    if token == self.ROS:
+                        parse_steps(body)
+                    if token == self.SNT or token == self.MNT:
+                        multi(token, body, pk)
+                self.send(self.STOP, None, None)
 
 
 @coroutine
@@ -112,11 +114,12 @@ def d3js_generator(stream):
 
 
 if __name__ == '__main__':
-    from Queue import Queue
+    from queue import Queue
     import json
 
     stream = Queue()
     pipeline = Pipeline(d3js_generator(stream)).start()
-    data = json.load(open('fixtures/data.json'))
+    data = json.load(open('fixtures/data.json', encoding='utf-8'))
+
     pipeline.send(data)
     print(stream.get())

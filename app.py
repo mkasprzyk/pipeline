@@ -51,8 +51,8 @@ def update():
         result = None
         if jenkins:
             jobs = jenkins.get_jobs()
-            data = {}
             for name, job in jobs:
+                data = {}
                 try:
                     last_build = job.get_last_build()
                     is_good = last_build.is_good()
@@ -61,21 +61,21 @@ def update():
                 data[name] = {
                     'is_running': job.is_running(),
                     'is_good': is_good}
-            result = json.dumps(data)
-        for sub in subscriptions[:]:
-            sub.put(result)
+                for sub in subscriptions[:]:
+                    sub.put(json.dumps(data))
 
+    app.logger.info('Spawn update')
     gevent.spawn(notify)
     return jsonify({'status': 200})
 
 
 class Data(Resource):
     def get(self):
-        data = json.load(open('fixtures/data.json'))
+        data = json.load(open('pipeline.json', encoding='utf-8'))
 
         stream = Queue()
         pipeline = Pipeline(d3js_generator(stream)).start()
-        pipeline.send(data)
+        pipeline.send(data.get('Steps'))
         return jsonify(stream.get())
 
 api.add_resource(Data, '/pipeline')

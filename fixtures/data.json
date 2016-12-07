@@ -1,1 +1,42 @@
-{"MultipleNamesThreads": {"APPLICATION1,APPLICATION2": [{"type": "job", "name": "JOB_Q"}, {"type": "job", "name": "JOB_Y"}], "APPLICATION3,APPLICATION4": [{"type": "job", "name": "JOB_Z"}, {"type": "job", "name": "JOB_X"}]}, "SingleNameThreads": {"SINGLE": [{"type": "job", "name": "Alone"}]}, "RunOnStart": [{"type": "job", "name": "Starter1"}, {"type": "job", "name": "Starter2"}]}
+{
+  "MultipleNamesThreads": {
+    "APPLICATION1,APPLICATION2": [
+      {
+        "type": "job",
+        "name": "JOB_Q"
+      },
+      {
+        "type": "job",
+        "name": "JOB_Y"
+      }
+    ],
+    "APPLICATION3,APPLICATION4": [
+      {
+        "type": "job",
+        "name": "JOB_Z"
+      },
+      {
+        "type": "job",
+        "name": "JOB_X"
+      }
+    ]
+  },
+  "SingleNameThreads": {
+    "SINGLE": [
+      {
+        "type": "job",
+        "name": "Alone"
+      }
+    ]
+  },
+  "RunOnStart": [
+    {
+      "type": "job",
+      "name": "Starter1"
+    },
+    {
+      "type": "job",
+      "name": "Starter2"
+    }
+  ]
+}
