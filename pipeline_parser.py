@@ -1,5 +1,3 @@
-from Queue import Queue
-import json
 
 def coroutine(fn):
     def wrapper(*args, **kwargs):
@@ -114,10 +112,11 @@ def d3js_generator(stream):
 
 
 if __name__ == '__main__':
-    stream = Queue()
+    from Queue import Queue
+    import json
 
+    stream = Queue()
     pipeline = Pipeline(d3js_generator(stream)).start()
     data = json.load(open('fixtures/data.json'))
     pipeline.send(data)
-
     print(stream.get())
