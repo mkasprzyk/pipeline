@@ -77,19 +77,25 @@ class Pipeline(object):
                         parse_steps(body)
                     if token == self.SNT or token == self.MNT:
                         multi(token, body, pk)
-                self.send(self.STOP, None, None)
+            self.send(self.STOP, None, None)
 
 
 @coroutine
 def d3js_generator(stream):
     CONTENTS = 'contents'
-
     pipeline = []
+    threads = {}
     item = {}
+
     while True:
         content = (yield)
         event = content.get('event')
         body = content.get('body')
+
+        if event == Pipeline.OPEN_BODY:
+            #prepare container for threads
+            threads[CONTENTS] = []
+            threads['name'] = 'parallel'
 
         if event == Pipeline.OPEN_THREAD:
             item[CONTENTS] = []
@@ -98,7 +104,7 @@ def d3js_generator(stream):
         if event == Pipeline.PARSE_JOB:
             if not item:
                 pipeline.append({
-                    'name': body['name']    
+                    'name': body['name']
                 })
             else:
                 item[CONTENTS].append({
@@ -106,8 +112,15 @@ def d3js_generator(stream):
                 })
 
         if event == Pipeline.CLOSE_THREAD:
-            pipeline.append(item)
+            if not threads:
+                pipeline.append(item)
+            else:
+                threads[CONTENTS].append(item)
             item = {}
+
+        if event == Pipeline.CLOSE_BODY:
+            pipeline.append(threads)
+            threads = {}
 
         if event == Pipeline.STOP:
             stream.put({'contents': pipeline, 'name': 'Root'})
