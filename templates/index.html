@@ -2,8 +2,19 @@
 <head>
 <link rel="stylesheet" type="text/css" href="static/css/style.css">
 </head>
-
 <body>
+
+<div id="infobar">
+    <table width="100%">
+      <tr>
+          <td>Application: <p id="application"></p></td>
+      </tr>
+        <tr>
+            <td>Version: <p id="version"></p></td>
+        </tr>
+    </table>
+</div>
+<div id="infobaralias"></div>
 <div id="pipeline"></div>
 
 <script type="text/javascript" src="static/js/jquery-1.6.2.min.js"></script>
@@ -15,6 +26,18 @@
     $(function () {
         var eventContainer = document.getElementById("event");
         var eventSource = new EventSource("/events");
+
+        var infoBar = $('#infobar').offset().top;
+
+        $(window).scroll(function(){
+                if( $(window).scrollTop() > infoBar ) {
+                        $('#infobar').css({position: 'fixed', top: '0px'});
+                        $('#infobaralias').css('display', 'block');
+                } else {
+                        $('#infobar').css({position: 'static', top: '0px'});
+                        $('#infobaralias').css('display', 'none');
+                }
+        });
 
         var dispatchEvent = function(event_data) {
          $.each(event_data, function(job, status) {
@@ -44,6 +67,7 @@
 
         $.getJSON('/pipeline', function(data) {
             buildPipeline("#pipeline", data);
+            console.log('test');
         })
         .fail(function() {
             console.log("Corrupted pipeline JSON file");
