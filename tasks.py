@@ -12,7 +12,7 @@ except Exception as e:
     jenkins = None
 
 
-def get_jobs_status(subscriptions, jenkins):
+def get_jobs_status(subscriptions):
     jobs = jenkins.get_jobs()
     for name, job in jobs:
         try:

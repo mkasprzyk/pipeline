@@ -45,7 +45,7 @@ def call(action):
     handler = handlers.get(action, None)
     if handler:
         app.logger.info('Spawn action: {}'.format(action))
-        handler(subscriptions=subscriptions, jenkins=jenkins)
+        handler(subscriptions)
         status = 200
     else:
         app.logger.info('Unknown action: {}'.format(action))
