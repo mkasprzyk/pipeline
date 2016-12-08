@@ -47,7 +47,6 @@ function buildPipeline(containerName, pipelineData, customOptions)
     var nodes = tree.nodes(pipelineData);
     var links = tree.links(nodes);
 
-    
     /*
         <svg>
             <g class="container" />
@@ -102,7 +101,13 @@ function buildPipeline(containerName, pipelineData, customOptions)
             return d.color || "white" ;
         });
 
-    nodeGroup.append("svg:text")
+    var textFormat = function(d) {
+        return d.name.toLowerCase()+'-text'
+    }
+
+    nodeGroup.append("svg:a")
+        .attr("xlink:href", function(d){return d.url;})
+        .append("svg:text")
         .attr("text-anchor", function(d)
         {
             return d.children ? "end" : "start";
@@ -113,12 +118,20 @@ function buildPipeline(containerName, pipelineData, customOptions)
             return d.children ? -gap : gap;
         })
         .attr("id", function(d) {
-            return d.name.toLowerCase()+'-text';
+            return textFormat(d);
         })
         .attr("dy", 3)
         .text(function(d)
         {
             return d.name;
+        })
+        .on("mouseover", function(d) {
+            d3.select('#version').html(d.version);
+            d3.select('#application').html(d.name);
+            d3.select(this).attr('class', 'mouseover');
+        })
+        .on("mouseout", function(d) {
+            d3.select(this).attr('class', 'mouseout');
         });
 
 }
