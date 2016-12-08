@@ -6,8 +6,8 @@ from gevent.queue import Queue
 from gevent import monkey
 monkey.patch_all()
 import gevent
+import tasks
 import json
-import time
 import os
 
 from pipeline_parser import Pipeline, d3js_generator
@@ -45,35 +45,26 @@ def events():
             subscriptions.remove(queue)
     return Response(gen(), mimetype="text/event-stream")
 
-@app.route("/update")
-def update():
-    def notify():
-        result = None
-        if jenkins:
-            jobs = jenkins.get_jobs()
-            for name, job in jobs:
-                data = {}
-                try:
-                    last_build = job.get_last_build()
-                    is_good = last_build.is_good()
-                except:
-                    is_good = False
-                data[name] = {
-                    'is_running': job.is_running(),
-                    'is_good': is_good}
-                for sub in subscriptions[:]:
-                    sub.put(json.dumps(data))
-
-    app.logger.info('Spawn update')
-    gevent.spawn(notify)
-    return jsonify({'status': 200})
+@app.route("/call/<action>")
+def call(action):
+    handlers = {
+        'get_jobs_status': tasks.get_jobs_status,
+    }
+    handler = handlers.get(action, None)
+    if handler:
+        app.logger.info('Spawn action: {}'.format(action))
+        gevent.spawn(handler, subscriptions=subscriptions, jenkins=jenkins)
+        status = 200
+    else:
+        app.logger.info('Unknown action: {}'.format(action))
+        status = 404
+    return jsonify({'status': status})
 
 
 class Data(Resource):
     def get(self):
-        data = json.load(open('pipeline.json', encoding='utf-8'))
-
         stream = Queue()
+        data = json.load(open('pipeline.json', encoding='utf-8'))
         pipeline = Pipeline(d3js_generator(stream)).start()
         pipeline.send(data.get('Steps'))
         return jsonify(stream.get())
