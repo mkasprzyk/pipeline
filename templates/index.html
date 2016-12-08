@@ -16,9 +16,8 @@
         var eventContainer = document.getElementById("event");
         var eventSource = new EventSource("/events");
 
-         eventSource.onmessage = function(e) {
-            event_data = JSON.parse(e.data);
-            $.each(event_data, function(job, status) {
+        var dispatchEvent = function(event_data) {
+         $.each(event_data, function(job, status) {
                 console.log(status);
                 handler = d3.select('#'+job.toLowerCase()+'-circle');
                 if (status.is_running) {
@@ -32,6 +31,15 @@
                     handler.style('fill', 'red')
                 }
             })
+         }
+
+         eventSource.onopen = function(e) {
+            console.log('Connection opened, getting results from cache');
+         };
+
+         eventSource.onmessage = function(e) {
+            event_data = JSON.parse(e.data);
+            dispatchEvent(event_data);
          };
 
         $.getJSON('/pipeline', function(data) {
