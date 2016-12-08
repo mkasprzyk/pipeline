@@ -13,8 +13,7 @@ except Exception as e:
 
 
 def get_jobs_status(subscriptions):
-    jobs = jenkins.get_jobs()
-    for name, job in jobs:
+    def get_single_status(name, job):
         try:
             last_build = job.get_last_build()
             is_good = last_build.is_good()
@@ -29,3 +28,7 @@ def get_jobs_status(subscriptions):
                     }
                 })
             )
+
+    jobs = jenkins.get_jobs()
+    for name, job in jobs:
+        gevent.spawn(get_single_status, name, job)
