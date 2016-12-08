@@ -104,11 +104,13 @@ def d3js_generator(stream):
         if event == Pipeline.PARSE_JOB:
             if not item:
                 pipeline.append({
-                    'name': body['name']
+                    'name': body['name'],
+                    'version': body['version']
                 })
             else:
                 item[CONTENTS].append({
-                    'name': body['name']
+                    'name': body['name'],
+                    'version': body['version']
                 })
 
         if event == Pipeline.CLOSE_THREAD:
