@@ -1,7 +1,8 @@
+*{margin:0px;padding:0px;}
+
 g.node {
-    font-family: Verdana, Helvetica;
+    font-family: Verdana;
     font-size: 12px;
-    font-weight: bold;
 }
 
 @keyframes blinker {  
@@ -16,4 +17,35 @@ circle.node-dot {
 path.link {
     fill: none;
     stroke: gray;
+}
+
+table {
+    background: gray;
+    color: white;
+    opacity: 0.5;
+    height: 50px;
+}
+
+text.mouseover {
+    fill: blue;
+}
+
+text.mouseout {
+    fill: black;
+}
+
+body, td {
+    font: 13px Verdana;
+}
+
+p {
+    display: inline;
+}
+
+#infobar {
+    width: 100%;
+}
+
+#infobaralias {
+    display: none;
 }
