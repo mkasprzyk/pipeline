@@ -1,4 +1,16 @@
+from jenkinsapi.jenkins import Jenkins
+import gevent
 import json
+import os
+
+try:
+    jenkins = Jenkins(os.environ.get('JENKINS_URL'),
+        username=os.environ.get('JENKINS_USERNAME'),
+        password=os.environ.get('JENKINS_PASSWORD'))
+except Exception as e:
+    #app.logger.error('Jenkins is unreachable')
+    jenkins = None
+
 
 def get_jobs_status(subscriptions, jenkins):
     jobs = jenkins.get_jobs()

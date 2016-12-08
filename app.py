@@ -1,6 +1,5 @@
 from flask import Flask, Response, jsonify, render_template, request
 from flask_restful import Resource, Api
-from jenkinsapi.jenkins import Jenkins
 from gevent.wsgi import WSGIServer
 from gevent.queue import Queue
 from gevent import monkey
@@ -18,13 +17,6 @@ app = Flask(__name__)
 api = Api(app)
 subscriptions = []
 
-try:
-    jenkins = Jenkins(os.environ.get('JENKINS_URL'),
-        username=os.environ.get('JENKINS_USERNAME'),
-        password=os.environ.get('JENKINS_PASSWORD'))
-except Exception as e:
-    app.logger.error('Jenkins is unreachable')
-    jenkins = None
 
 @app.route('/')
 def index():
@@ -53,13 +45,12 @@ def call(action):
     handler = handlers.get(action, None)
     if handler:
         app.logger.info('Spawn action: {}'.format(action))
-        gevent.spawn(handler, subscriptions=subscriptions, jenkins=jenkins)
+        handler(subscriptions=subscriptions, jenkins=jenkins)
         status = 200
     else:
         app.logger.info('Unknown action: {}'.format(action))
         status = 404
     return jsonify({'status': status})
-
 
 class Data(Resource):
     def get(self):
@@ -76,4 +67,3 @@ if __name__ == '__main__':
     app.debug = True
     server = WSGIServer(("", 5000), app)
     server.serve_forever()
-
