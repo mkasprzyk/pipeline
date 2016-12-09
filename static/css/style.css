@@ -33,6 +33,7 @@ table {
 
 text.mouseover {
     fill: blue;
+    cursor: inherit;
 }
 
 text.mouseout {
