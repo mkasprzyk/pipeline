@@ -26,6 +26,7 @@
     $(function () {
         var eventContainer = document.getElementById("event");
         var eventSource = new EventSource("/events");
+        var channel = null;
 
         var infoBar = $('#infobar').offset().top;
 
@@ -41,7 +42,15 @@
 
         var dispatchEvent = function(event_data) {
          $.each(event_data, function(job, status) {
-                console.log(status);
+                if (job == '__channel__') {
+                    channel = status;
+                    console.log('Received channel: ' + channel);
+                    $.get('call/get_jobs_status/' + channel, function(data) {
+                        console.log('Cache triggered');
+                    });
+                    return true;
+                }
+                console.log(job + '-' + status.channel);
                 handler = d3.select('#'+job.toLowerCase()+'-circle');
                 if (status.is_running) {
                     handler.style('animation', 'blinker 2s linear infinite');
@@ -61,9 +70,7 @@
             })
          }
 
-         eventSource.onopen = function(e) {
-            console.log('Connection opened, getting results from cache');
-         };
+
 
          eventSource.onmessage = function(e) {
             event_data = JSON.parse(e.data);

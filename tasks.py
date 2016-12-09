@@ -1,7 +1,9 @@
+from werkzeug.contrib.cache import SimpleCache
 from jenkinsapi.jenkins import Jenkins
 import gevent
 import json
 import os
+
 
 try:
     jenkins = Jenkins(os.environ.get('JENKINS_URL'),
@@ -12,23 +14,34 @@ except Exception as e:
     jenkins = None
 
 
-def get_jobs_status(subscriptions):
-    def get_single_status(name, job):
+def get_jobs_status(subscriptions, cache=None, channel=None):
+    def publish(content, channel=None):
+        if channel:
+            sub = subscriptions.get(channel)
+            sub.put(json.dumps(content))
+        else:
+            for _, sub in subscriptions.items():
+                sub.put(json.dumps(content))
+
+    def get_single_status(name, job, channel=channel):
         try:
             last_build = job.get_last_build()
             is_good = last_build.is_good()
         except:
             is_good = False
-        for sub in subscriptions[:]:
-            sub.put(
-                json.dumps({
-                    name: {
-                        'is_running': job.is_running(),
-                        'is_good': is_good
-                    }
-                })
-            )
+        status = {name: {
+            'is_running': job.is_running(),
+            'is_good': is_good,
+            'channel': 'all'}}
+        cache.set(name, status, timeout=0)
+        publish(status, channel=channel)
 
     jobs = jenkins.get_jobs()
     for name, job in jobs:
-        gevent.spawn(get_single_status, name, job)
+        if cache.has(name):
+            #if exist in cache, send only to channel
+            content = cache.get(name)
+            content[name]['channel'] = channel
+            publish(content, channel=channel)
+        else:
+            get_single_status(name, job, channel=channel)
