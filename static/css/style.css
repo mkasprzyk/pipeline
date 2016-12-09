@@ -1,9 +1,9 @@
 *{margin:0px;padding:0px;}
 
-body {
+/*body {
     background:url(../img/datboi.jpg) top right no-repeat;
     background-attachment:fixed;
-}
+}*/
 
 g.node {
     font-family: Verdana;
@@ -27,12 +27,13 @@ path.link {
 table {
     background: gray;
     color: white;
-    opacity: 0.5;
+    opacity: 0.9;
     height: 50px;
 }
 
 text.mouseover {
     fill: blue;
+    cursor: inherit;
 }
 
 text.mouseout {

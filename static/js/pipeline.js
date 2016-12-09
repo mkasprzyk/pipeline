@@ -91,6 +91,7 @@ function buildPipeline(containerName, pipelineData, customOptions)
             return "translate(" + d.y + "," + d.x + ")";
         });
 
+    /*
     nodeGroup.append("svg:circle")
         .attr("class", "node-dot")
         .attr("id", function(d) {
@@ -100,6 +101,17 @@ function buildPipeline(containerName, pipelineData, customOptions)
         .style("fill", function(d) {
             return d.color || "white" ;
         });
+    */
+
+    nodeGroup.append("svg:image")
+        .attr("id", function(d) {
+            return d.name.toLowerCase()+'-circle';
+        })
+        .attr("width", 15)
+        .attr("height", 15)
+        .attr("x", -2)
+        .attr("y", -7.5)
+        .attr("xlink:href", "static/img/nobuilt.png");
 
     var textFormat = function(d) {
         return d.name.toLowerCase()+'-text'

@@ -26,6 +26,7 @@
     $(function () {
         var eventContainer = document.getElementById("event");
         var eventSource = new EventSource("/events");
+        var channel = null;
 
         var infoBar = $('#infobar').offset().top;
 
@@ -41,33 +42,41 @@
 
         var dispatchEvent = function(event_data) {
          $.each(event_data, function(job, status) {
-                console.log(status);
+                if (job == '__channel__') {
+                    channel = status;
+                    console.log('Received channel: ' + channel);
+                    $.get('call/get_jobs_status/' + channel, function(data) {
+                        console.log('Cache triggered');
+                    });
+                    return true;
+                }
+                console.log(job + '-' + status.channel);
                 handler = d3.select('#'+job.toLowerCase()+'-circle');
                 if (status.is_running) {
                     handler.style('animation', 'blinker 2s linear infinite');
                 } else {
                     handler.style('animation', 'false');
                 }
-                if (status.is_good) {
+                /*if (status.is_good) {
                     handler.style('fill', 'blue')
                 } else {
                     handler.style('fill', 'red')
+                }*/
+                if (status.is_good) {
+                    handler.attr("xlink:href", "static/img/blue.png");
+                } else {
+                    handler.attr("xlink:href", "static/img/red.png");
                 }
             })
          }
-
-         eventSource.onopen = function(e) {
-            console.log('Connection opened, getting results from cache');
-         };
 
          eventSource.onmessage = function(e) {
             event_data = JSON.parse(e.data);
             dispatchEvent(event_data);
          };
 
-        $.getJSON('/pipeline', function(data) {
+        $.getJSON('/api/pipeline', function(data) {
             buildPipeline("#pipeline", data);
-            console.log('test');
         })
         .fail(function() {
             console.log("Corrupted pipeline JSON file");
