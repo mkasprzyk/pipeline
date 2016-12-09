@@ -17,7 +17,7 @@ subscriptions = {}
 
 
 def configuration(stream, generator):
-    data = json.load(open('pipeline.json', encoding='utf-8'))
+    data = json.load(open('fixtures/data.json', encoding='utf-8'))
     if generator == 'pipeline':
         handler = d3js_generator(stream)
     if generator == 'jobs':
