@@ -1,23 +1,28 @@
 {
+  "Steps": [{
   "MultipleNamesThreads": {
     "APPLICATION1,APPLICATION2": [
       {
         "type": "job",
-        "name": "JOB_Q"
+        "name": "JOB_Q",
+        "version": 1
       },
       {
         "type": "job",
-        "name": "JOB_Y"
+        "name": "JOB_Y",
+        "version": 2
       }
     ],
     "APPLICATION3,APPLICATION4": [
       {
         "type": "job",
-        "name": "JOB_Z"
+        "name": "JOB_Z",
+        "version": 3
       },
       {
         "type": "job",
-        "name": "JOB_X"
+        "name": "JOB_X",
+        "version": 4
       }
     ]
   },
@@ -25,18 +30,22 @@
     "SINGLE": [
       {
         "type": "job",
-        "name": "Alone"
+        "name": "Alone",
+        "version": 5
       }
     ]
   },
   "RunOnStart": [
     {
       "type": "job",
-      "name": "Starter1"
+      "name": "Starter1",
+       "version": 6
     },
     {
       "type": "job",
-      "name": "Starter2"
+      "name": "Starter2",
+      "version": 7
     }
   ]
+ }]
 }

@@ -136,5 +136,5 @@ if __name__ == '__main__':
     pipeline = Pipeline(d3js_generator(stream)).start()
     data = json.load(open('fixtures/data.json', encoding='utf-8'))
 
-    pipeline.send(data)
+    pipeline.send(data.get('Steps'))
     print(stream.get())
