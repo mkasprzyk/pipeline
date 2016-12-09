@@ -8,13 +8,22 @@ import gevent
 import tasks
 import json
 
-from pipeline_parser import Pipeline, d3js_generator
+from pipeline_parser import Pipeline, d3js_generator, jobs_generator
 from sse import ServerSentEvent
 
 app = Flask(__name__)
 cache = SimpleCache()
 subscriptions = {}
 
+
+def configuration(stream, generator):
+    data = json.load(open('pipeline.json', encoding='utf-8'))
+    if generator == 'pipeline':
+        handler = d3js_generator(stream)
+    if generator == 'jobs':
+        handler = jobs_generator(stream)
+    pipeline = Pipeline(handler).start()
+    pipeline.send(data.get('Steps'))
 
 @app.route('/')
 def index():
@@ -40,25 +49,30 @@ def events():
 
 @app.route("/call/<action>/<channel>")
 def call(action, channel):
+    stream = Queue()
+    configuration(stream, 'jobs')
+    jobs = stream.get()
     handlers = {
         'get_jobs_status': tasks.get_jobs_status,
     }
     handler = handlers.get(action, None)
     if handler:
         app.logger.info('Spawn action: {}'.format(action))
-        gevent.spawn(handler, subscriptions, cache, channel=channel)
+        gevent.spawn(handler, subscriptions,
+                     cache=cache,
+                     channel=channel,
+                     jobs=jobs)
         status = 200
     else:
         app.logger.info('Unknown action: {}'.format(action))
         status = 404
     return jsonify({'status': status})
 
-@app.route("/pipeline")
-def data():
+
+@app.route("/api/<generator>")
+def data(generator):
     stream = Queue()
-    data = json.load(open('pipeline.json', encoding='utf-8'))
-    pipeline = Pipeline(d3js_generator(stream)).start()
-    pipeline.send(data.get('Steps'))
+    configuration(stream, generator)
     return jsonify(stream.get())
 
 

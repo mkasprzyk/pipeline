@@ -79,6 +79,21 @@ class Pipeline(object):
                         multi(token, body, pk)
             self.send(self.STOP, None, None)
 
+@coroutine
+def jobs_generator(stream):
+    CONTENTS = 'contents'
+    jobs = []
+    while True:
+        content = (yield)
+        event = content.get('event')
+        body = content.get('body')
+        if event == Pipeline.PARSE_JOB:
+            job = body["name"]
+            if job:
+                jobs.append(job)
+        if event == Pipeline.STOP:
+            stream.put(jobs)
+
 
 @coroutine
 def d3js_generator(stream):

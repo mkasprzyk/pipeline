@@ -70,14 +70,12 @@
             })
          }
 
-
-
          eventSource.onmessage = function(e) {
             event_data = JSON.parse(e.data);
             dispatchEvent(event_data);
          };
 
-        $.getJSON('/pipeline', function(data) {
+        $.getJSON('/api/pipeline', function(data) {
             buildPipeline("#pipeline", data);
         })
         .fail(function() {

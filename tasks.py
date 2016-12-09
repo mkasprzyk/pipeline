@@ -14,7 +14,10 @@ except Exception as e:
     jenkins = None
 
 
-def get_jobs_status(subscriptions, cache=None, channel=None):
+def get_jobs_status(subscriptions, *args, **kwargs):
+    cache = kwargs.get('cache')
+    channel = kwargs.get('channel')
+    jobs = kwargs.get('jobs')
     def publish(content, channel=None):
         if channel:
             sub = subscriptions.get(channel)
@@ -23,7 +26,8 @@ def get_jobs_status(subscriptions, cache=None, channel=None):
             for _, sub in subscriptions.items():
                 sub.put(json.dumps(content))
 
-    def get_single_status(name, job, channel=channel):
+    def get_single_status(name, channel=channel):
+        job = jenkins.get_job(name)
         try:
             last_build = job.get_last_build()
             is_good = last_build.is_good()
@@ -36,12 +40,11 @@ def get_jobs_status(subscriptions, cache=None, channel=None):
         cache.set(name, status, timeout=0)
         publish(status, channel=channel)
 
-    jobs = jenkins.get_jobs()
-    for name, job in jobs:
+    for name in jobs:
         if cache.has(name):
             #if exist in cache, send only to channel
             content = cache.get(name)
             content[name]['channel'] = channel
             publish(content, channel=channel)
         else:
-            get_single_status(name, job, channel=channel)
+            get_single_status(name, channel=channel)
