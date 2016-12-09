@@ -48,10 +48,15 @@
                 } else {
                     handler.style('animation', 'false');
                 }
-                if (status.is_good) {
+                /*if (status.is_good) {
                     handler.style('fill', 'blue')
                 } else {
                     handler.style('fill', 'red')
+                }*/
+                if (status.is_good) {
+                    handler.attr("xlink:href", "static/img/blue.png");
+                } else {
+                    handler.attr("xlink:href", "static/img/red.png");
                 }
             })
          }
@@ -67,7 +72,6 @@
 
         $.getJSON('/pipeline', function(data) {
             buildPipeline("#pipeline", data);
-            console.log('test');
         })
         .fail(function() {
             console.log("Corrupted pipeline JSON file");
